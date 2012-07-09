@@ -1,0 +1,104 @@
+--- Legend:
+ [-] not yet done
+ [+] done
+ [*] in progress
+
+--- General:
++ Cleanup read vs load.
+- Cleanup static functions.
+- Cleanup header usage.
+- Cleanup error handling (abort cleanly to the process in question too).
+- Cleanup verbosity/debugging messages.
+- Check use of malloc in restore funcs.
+- Licensing on each file.
+- Do a better malloc implementation (even if it involves beating libc malloc to
+  not use mmap somehow).
++ Better remote syscall support, ala _syscall{0..5}.
++ Split out write vs read code. Why isn't the linker smart enough to do this?
++ Figure a sane way of building & linking against uclibc or dietlibc.
+- Implement make-static cleanly.
+
+--- Misc:
+- Environment
+- Command line
+  If randomize_va_space = 0, then we should be able to reconstruct the
+  environment, argv, and obtain the right offset.
+  Otherwise, if we're probably screwed.
+- Working directory
+
+--- Registers:
++ regs
++ fail syscalls in progress with EINTR (are there any we should restart?)
++ restore after getting image
+
+--- FPU:
+- i387 state
+
+--- TLS:
++ TLS segments
++ tls hack for porting 2.6 processes to 2.4
+
+--- File descriptors:
++ files
+- file contents
++ fcntl state - blocking & close_on_exec
+- fcntl state - locks
++ consoles
++ termios state
++ TCP sockets
+- allow for not killing TCP sockets when saved
+- tcpcpd to firewall TCP connections when being migrated
+- UDP sockets
++ Unix sockets
++ FIFOs to self
+- FIFOs to other processes
+- sound devices (ALSA & OSS)
+- large file support
++ deleted files (scrape out and regenerate)
+- interactive prompting for file seek offsets and restoration
+
+--- VMAs:
++ memory segments
++ un-mprotect unreadable segments so they can be scraped.
+- detect EIO and claim VM_IO, so just mmap it on other side.
+- deal with non-existant VMAs... warn before continuing?
++ Checksum unsaved libraries
+- Allow turning checksums off for speed.
++ mmap existing libraries if available, even if in image, to save on memory
+
+--- Signal Handlers:
++ sighands
+- process signal masks (blocked, ignored)
++ stopped state
+- restart alarms
++ SIGWINCH me
+
+--- IPC:
+- shared memory
+- semaphores
+- message queues
+
+--- Threads:
+- Identify common:
+  - CLONE_PARENT
+  - CLONE_FS
+  - CLONE_FILES
+  - CLONE_NEWNS
+  - CLONE_SIGHAND
+  - CLONE_THREAD
+  - CLONE_VM
+- TLS
+- TID
+- futexes
+
+--- Compression:
++ LZF
+- LZF in-place decompression
++ GZIP
+
+
+--- Graphics:
++ Gtk hooks
+* Fix Gdk
+
+vim:ft=diff
