@@ -1,8 +1,9 @@
 # Disabling tcpcp support saves a few KB in the binary.
-USE_TCPCP=n
+USE_TCPCP=y
 USE_GTK=n
 
 ARCH=$(shell uname -m)
+LIBCOMPAT=../../cryopid-0.6.9/dietlibc-x86_64/bin-x86_64/libcompat.a
 
 # Test if this gcc supports stack protection (and if so, turn it off).
 ifeq ($(shell $(CC) -E -fno-stack-protector - < /dev/null > /dev/null 2>&1 && echo 1),1)
@@ -20,7 +21,6 @@ endif
 ifeq ($(ARCH), x86_64)
 ARCH_OFORMAT=elf64-x86-64
 LD_FORMAT=elf_x86_64
-LIBCOMPAT=/usr/lib/diet/lib/libcompat.a
 USE_TCPCP=n
 USE_GTK=n
 endif
@@ -40,13 +40,13 @@ endif
 
 R_CHUNK_OBJS = cpimage_r.o cp_r_fd.o cp_r_fd_console.o cp_r_fd_file.o cp_r_fd_fifo.o cp_r_fd_socket.o cp_r_misc.o cp_r_sighand.o cp_r_vma.o cp_r_header.o arch/arch_r_objs.o fork2.o
 W_CHUNK_OBJS = cpimage_w.o cp_w_fd.o cp_w_fd_console.o cp_w_fd_file.o cp_w_fd_fifo.o cp_w_fd_socket.o cp_w_misc.o cp_w_sighand.o cp_w_vma.o cp_w_header.o arch/arch_w_objs.o list.o 
-COMMON_OBJS = common.c arch/asmfuncs.o
+COMMON_OBJS = common.c
 STUB_TYPES = gzip # raw buffered lzo
 STUBS = $(patsubst %,stub-%,$(STUB_TYPES))
 TARGETS = freeze fork2_helper
 
 # How do we get our libc linked into the stub?
-LIBC = -DPROVIDE_MALLOC -nostdlib -nostartfiles $(LIBCOMPAT) -lgcc
+LIBC = -DPROVIDE_MALLOC -nostdlib -nostartfiles ../dietlibc-x86_64/dietlibc.a $(LIBCOMPAT) -lgcc
 #LIBC = -nostdlib -nostartfiles -lc
 
 # Compile in tcpcp if wanted/needed
@@ -97,14 +97,13 @@ freeze: $(COMMON_OBJS) $(W_CHUNK_OBJS) freeze.o $(patsubst %,stub-image-%.o,$(ST
 gtk_support.o: gtk_support.c
 	$(CC) $(CFLAGS) -I/usr/include/gtk-2.0 -I/usr/include/glib-2.0 -I/usr/lib/glib-2.0/include -I/usr/include/pango-1.0 -I/usr/lib/gtk-2.0/include -I/usr/include/atk-1.0 -c $<
 
-DESTDIR=/
-PREFIX=/usr
+DESTDIR=/ws
+PREFIX=harspras-bgl
 
 fork2_helper: fork2_helper.c
-	echo "Fork2 extra rule is executed."
 	$(CC) $(CFLAGS) $< -o $@
 
-install:	freeze fork2_helper
+install: freeze fork2_helper
 	[ -d $(DESTDIR)/$(PREFIX)/bin/ ] || mkdir -p $(DESTDIR)/$(PREFIX)/bin/
 	cp freeze $(DESTDIR)/$(PREFIX)/bin/
 	[ -d $(DESTDIR)/$(PREFIX)/lib/cryopid/ ] || mkdir -p $(DESTDIR)/$(PREFIX)/lib/cryopid/

@@ -10,7 +10,7 @@
 #include <signal.h>
 
 #include "list.h"
-#include "cplayout.h"
+#include "arch/cplayout.h"
 
 #define IMAGE_VERSION 0x03
 

@@ -5,7 +5,7 @@
 #include <fcntl.h>
 #include <stdio.h>
 #include <unistd.h>
-#include <asm/page.h>
+#include <sys/user.h>
 
 #include "cpimage.h"
 #include "process.h"
@@ -15,7 +15,6 @@ unsigned long scribble_zone = 0; /* somewhere to scribble on in child */
 unsigned long syscall_loc   = 0; /* address of a syscall instruction  */
 unsigned long vdso_start    = 0; /* start address of vdso page        */
 unsigned long vdso_end      = 0; /* end address of vdso page          */
-int page_size;
 
 void write_chunk_vma(void *fptr, struct cp_vma *data)
 {
@@ -60,10 +59,7 @@ static int get_one_vma(pid_t pid, char* line, struct cp_vma *vma,
     }
     *ptr2 = '\0';
     vma->start = strtoul(ptr1, NULL, 16);
-    page_size = getpagesize();
-#ifndef PAGE_SIZE
-#define PAGE_SIZE page_size
-#endif
+
     if (vma->start >= TRAMPOLINE_ADDR && vma->start <= TRAMPOLINE_ADDR+PAGE_SIZE) {
 	fprintf(stderr, "     Ignoring map - looks like resumer trampoline.\n");
 	return 0;

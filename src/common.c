@@ -6,11 +6,9 @@
 #include <string.h>
 #include <unistd.h>
 #include <sys/mman.h>
-#include <asm/page.h>
+#include <sys/user.h>
 
 #include "cryopid.h"
-
-int page_size;
 
 long syscall_check(int retval, int can_be_fake, char* desc, ...)
 {
@@ -57,11 +55,6 @@ void safe_read(int fd, void* dest, size_t count, char* desc)
 static void *cp_malloc_hook(size_t size, const void *caller)
 {
     static long next_free_addr = MALLOC_START;
-    page_size = getpagesize();
-#ifndef PAGE_SIZE
-#define PAGE_SIZE page_size
-#endif
-
     int full_len = (size + (PAGE_SIZE-1)) & ~(PAGE_SIZE-1);
     if (next_free_addr + full_len > MALLOC_END)
 	return NULL; /* out of memory here */
